@@ -3,184 +3,207 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0aa65a" />
-  <title>Control de Conductores</title>
+  <title>Distribución Conductores Patio ECI</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: #0aa65a;
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      background: linear-gradient(to right, #7ed957 0%, #008037 100%);
+      background-attachment: fixed;
+      font-family: 'Arial Black', Gadget, sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 20px;
+      min-width: 100vw;
+      padding: 40px 20px;
+      overflow-y: auto;
     }
 
-    /* LIENZO FIJO */
     #canvas {
       position: relative;
-      width: 1200px;
-      height: 700px;
-      background: #0aa65a;
+      width: 1000px;
+      height: 850px;
+      background: transparent;
+    }
+
+    /* TÍTULO SUPERIOR */
+    .titulo {
+      position: absolute;
+      top: 30px;
+      left: 100px;
+      color: white;
+      font-size: 32px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      -webkit-text-stroke: 1px rgba(0,0,0,0.2);
     }
 
     /* BOTÓN CAPTURA */
     .btn-captura {
       position: absolute;
-      left: 30px;
-      top: 90px;
-      background: #2b2b2b;
+      left: 40px;
+      top: 380px;
+      background: #333;
       color: white;
       border: none;
-      padding: 14px 22px;
-      border-radius: 8px;
-      font-weight: 800;
+      padding: 15px 30px;
+      border-radius: 10px;
+      font-size: 20px;
+      font-weight: bold;
       cursor: pointer;
-      z-index: 50;
+      text-transform: uppercase;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
 
-    /* TURNOS: DEBAJO DE CAPTURA */
-    .turnos {
+    /* TURNO */
+    .turno-display {
       position: absolute;
-      left: 30px;
-      top: 160px;
-      background: white;
-      padding: 16px 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      z-index: 40;
+      right: -90px;
+      top: 380px;
+      text-align: center;
+      color: #7ed957;
+      line-height: 1;
     }
+    .turno-label { font-size: 28px; color: #7ed957; }
+    .turno-valor { font-size: 40px; display: block; }
 
-    .turnos label {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 800;
-      font-size: 15px;
-      margin-bottom: 10px;
-      cursor: pointer;
-    }
-
-    .turnos label:last-child { margin-bottom: 0; }
-    input[type=radio] { transform: scale(1.3); }
-
-    /* ZONAS */
+    /* ZONAS DE INPUTS */
     .zona {
       position: absolute;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      z-index: 20;
+      gap: 8px;
     }
 
     .zona input {
-      width: 230px;
-      height: 38px;
-      border-radius: 12px;
+      width: 240px;
+      height: 32px;
       border: none;
-      padding: 0 14px;
-      font-size: 15px;
-      font-weight: 700;
+      border-radius: 4px;
+      padding: 0 10px;
+      font-weight: bold;
+      font-size: 16px;
       outline: none;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
     }
 
-    /* COLORES */
-    .naranja input { background: #f5b234; color: #000; }
-    .azul input    { background: #1f2aa8; color: #fff; }
-    .rojo input    { background: #b01212; color: #fff; }
-    .amarillo input{ background: #fff200; color: #000; }
-    .morado input  { background: #8e24aa; color: #fff; }
+    /* COLORES SEGÚN IMAGEN */
+    .naranja input  { background-color: #ffbd59; color: #000; }
+    .teal input     { background-color: #12a19a; color: #fff; }
+    .coral input    { background-color: #f08080; color: #fff; }
+    .amarillo input { background-color: #fff200; color: #000; }
+    .morado input   { background-color: #a370f7; color: #fff; }
 
-    /* FILA SUPERIOR */
-    .naranja { top: 40px; left: 200px; }
-    .azul    { top: 40px; left: 480px; }
-    .rojo    { top: 40px; left: 760px; }
+    /* POSICIONES */
+    .naranja  { top: 130px; left: 100px; }
+    .teal     { top: 130px; left: 380px; }
+    .coral    { top: 130px; left: 660px; }
+    .amarillo { top: 520px; left: 50px; }
+    .morado   { top: 520px; left: 700px; }
 
-    /* FILA INFERIOR */
-    .amarillo { top: 420px; left: 120px; }
-    .morado   { top: 420px; left: 850px; }
-
-    /* MAPA: CENTRADO ENTRE AMARILLO Y MORADO, DEBAJO DEL AZUL */
-    .mapa {
+    /* MAPA CENTRAL */
+    .mapa-container {
       position: absolute;
-      left: 405px;
       top: 380px;
+      left: 335px;
       width: 380px;
-      z-index: 10;
-      pointer-events: none;
+      z-index: 5;
     }
-
-    .mapa img {
+    .mapa-container img {
       width: 100%;
-      display: block;
+      filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
     }
 
-    @media (max-width: 1300px) {
-      #canvas {
-        transform: scale(0.9);
-        transform-origin: top center;
-      }
+    /* ETIQUETA EXT */
+    .ext-label {
+      display: none;
+    }
+
+    /* SELECTOR DE TURNO OCULTO PARA CAPTURA */
+    #turno-selector {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: white;
+      padding: 10px;
+      border-radius: 5px;
+      z-index: 100;
     }
   </style>
 </head>
 <body>
 
 <div id="canvas">
-
-  <button class="btn-captura" onclick="capturar()">CAPTURA</button>
-
-  <div class="turnos">
-    <label><input type="radio" name="turno"> MAÑANA</label>
-    <label><input type="radio" name="turno"> TARDE</label>
-    <label><input type="radio" name="turno"> NOCHE</label>
-  </div>
+  <div class="titulo">DISTRIBUCIÓN CONDUCTORES PATIO ECI</div>
 
   <!-- FILA SUPERIOR -->
   <div class="zona naranja">
     <input><input><input><input><input>
   </div>
-
-  <div class="zona azul">
+  <div class="zona teal">
+    <input><input><input><input><input>
+  </div>
+  <div class="zona coral">
     <input><input><input><input><input>
   </div>
 
-  <div class="zona rojo">
-    <input><input><input><input><input>
+  <!-- BOTÓN Y TURNO -->
+  <button class="btn-captura" onclick="capturar()">CAPTURA</button>
+
+  <div class="turno-display">
+    <span class="turno-label">TURNO</span>
+    <span class="turno-valor" id="current-turno">MAÑANA</span>
   </div>
 
-  <!-- MAPA CENTRAL -->
-  <div class="mapa">
-    <img src="MAPA.png" alt="Mapa" />
+  <!-- MAPA -->
+  <div class="mapa-container">
+    <img src="MAPA.png" alt="Mapa">
   </div>
+
+  <div class="ext-label">EXT</div>
 
   <!-- FILA INFERIOR -->
   <div class="zona amarillo">
     <input><input><input><input><input><input>
   </div>
-
   <div class="zona morado">
     <input><input><input><input><input>
   </div>
+</div>
 
+<!-- CONTROL DE TURNO -->
+<div id="turno-selector">
+  Cambiar Turno: 
+  <select onchange="document.getElementById('current-turno').innerText = this.value">
+    <option value="MAÑANA">MAÑANA</option>
+    <option value="TARDE">TARDE</option>
+    <option value="NOCHE">NOCHE</option>
+  </select>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
   function capturar() {
     const btn = document.querySelector('.btn-captura');
-    btn.style.display = 'none';
+    const selector = document.getElementById('turno-selector');
+
+    btn.style.visibility = 'hidden';
+    selector.style.display = 'none';
 
     html2canvas(document.getElementById('canvas'), {
       scale: 2,
-      backgroundColor: '#0aa65a'
+      useCORS: true,
+      backgroundColor: null
     }).then(canvas => {
-      const a = document.createElement('a');
-      a.download = 'distribucion-conductores.png';
-      a.href = canvas.toDataURL();
-      a.click();
-      btn.style.display = 'block';
+      const link = document.createElement('a');
+      link.download = 'distribucion_conductores.png';
+      link.href = canvas.toDataURL();
+      link.click();
+
+      btn.style.visibility = 'visible';
+      selector.style.display = 'block';
     });
   }
 </script>
